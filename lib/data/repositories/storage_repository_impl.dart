@@ -11,9 +11,4 @@ class StorageRepositoryImpl implements StorageRepository {
   Future<bool> saveDrawing(GlobalKey canvasKey) {
     return _dataSource.saveDrawing(canvasKey);
   }
-
-  @override
-  Future<bool> requestPermissions() {
-    return _dataSource.requestPermissions();
-  }
 }
