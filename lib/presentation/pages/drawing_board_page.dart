@@ -42,7 +42,7 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
 
   void _setupSocketListeners() {
     final socketRepository = GetIt.instance<SocketRepository>();
-    
+
     // Listen to remote drawing events
     _drawLineSubscription = socketRepository.drawLineStream.listen((line) {
       print('Received remote line');
@@ -78,18 +78,12 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shared Board'),
+        title: const Text('Draw it'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: _showNameDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveDrawing,
-          ),
+          IconButton(icon: const Icon(Icons.edit), onPressed: _showNameDialog),
+          IconButton(icon: const Icon(Icons.save), onPressed: _saveDrawing),
           BlocBuilder<DrawingBloc, DrawingState>(
             builder: (context, state) {
               final canUndo = state.lines.isNotEmpty;
@@ -98,13 +92,14 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
                   Icons.undo,
                   color: canUndo ? Colors.white : Colors.white54,
                 ),
-                onPressed: canUndo
-                    ? () {
-                        print('Local undo triggered');
-                        context.read<DrawingBloc>().add(const UndoEvent());
-                        context.read<SocketBloc>().add(const EmitUndoEvent());
-                      }
-                    : null,
+                onPressed:
+                    canUndo
+                        ? () {
+                          print('Local undo triggered');
+                          context.read<DrawingBloc>().add(const UndoEvent());
+                          context.read<SocketBloc>().add(const EmitUndoEvent());
+                        }
+                        : null,
               );
             },
           ),
@@ -116,16 +111,19 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
                   Icons.redo,
                   color: canRedo ? Colors.white : Colors.white54,
                 ),
-                onPressed: canRedo
-                    ? () {
-                        print('Local redo triggered');
-                        // Get the line that will be redone
-                        final lineToRedo = state.undoStack.last;
-                        context.read<DrawingBloc>().add(const RedoEvent());
-                        // Emit the line to other users
-                        context.read<SocketBloc>().add(EmitDrawLineEvent(lineToRedo));
-                      }
-                    : null,
+                onPressed:
+                    canRedo
+                        ? () {
+                          print('Local redo triggered');
+                          // Get the line that will be redone
+                          final lineToRedo = state.undoStack.last;
+                          context.read<DrawingBloc>().add(const RedoEvent());
+                          // Emit the line to other users
+                          context.read<SocketBloc>().add(
+                            EmitDrawLineEvent(lineToRedo),
+                          );
+                        }
+                        : null,
               );
             },
           ),
@@ -136,38 +134,26 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
           // Connection status
           BlocBuilder<SocketBloc, SocketState>(
             builder: (context, state) {
+              final socketRepository = GetIt.instance<SocketRepository>();
+              bool isActualConnected = socketRepository.isConnected;
               return Container(
                 padding: const EdgeInsets.all(8.0),
-                color: state.isConnected ? Colors.green.shade100 : Colors.red.shade100,
+                color:
+                    isActualConnected
+                        ? Colors.green.shade100
+                        : Colors.red.shade100,
                 child: Row(
                   children: [
                     Icon(
-                      state.isConnected ? Icons.check_circle : Icons.error,
-                      color: state.isConnected ? Colors.green : Colors.red,
+                      isActualConnected ? Icons.check_circle : Icons.error,
+                      color: isActualConnected ? Colors.green : Colors.red,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      state.isConnected
+                      isActualConnected
                           ? 'Connected as ${state.userName.isNotEmpty ? state.userName : "User"}'
                           : 'Disconnected. Trying to reconnect...',
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          // Debug info
-          BlocBuilder<DrawingBloc, DrawingState>(
-            builder: (context, state) {
-              return Container(
-                padding: const EdgeInsets.all(8.0),
-                color: Colors.grey.shade100,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text('Lines: ${state.lines.length}'),
-                    Text('Undo Stack: ${state.undoStack.length}'),
                   ],
                 ),
               );
@@ -234,29 +220,32 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Your Name'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Your Name'),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+      builder:
+          (newContext) => AlertDialog(
+            title: const Text('Change Your Name'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(labelText: 'Your Name'),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(newContext),
+                child: const Text('CANCEL'),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (controller.text.trim().isNotEmpty) {
+                    context.read<SocketBloc>().add(
+                      UpdateNameEvent(controller.text.trim()),
+                    );
+                  }
+                  Navigator.pop(newContext);
+                },
+                child: const Text('SAVE'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                context.read<SocketBloc>().add(UpdateNameEvent(controller.text.trim()));
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('SAVE'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -264,11 +253,15 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
     try {
       final saveUseCase = GetIt.instance<SaveDrawingUseCase>();
       final success = await saveUseCase(_canvasKey);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'Drawing saved successfully!' : 'Failed to save drawing'),
+            content: Text(
+              success
+                  ? 'Drawing saved successfully!'
+                  : 'Failed to save drawing',
+            ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );

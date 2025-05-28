@@ -33,12 +33,11 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       home: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (context) => GetIt.instance<DrawingBloc>()),
           BlocProvider(
-            create: (context) => GetIt.instance<DrawingBloc>(),
-          ),
-          BlocProvider(
-            create: (context) => GetIt.instance<SocketBloc>()
-              ..add(const ConnectEvent()),
+            create:
+                (context) =>
+                    GetIt.instance<SocketBloc>()..add(const ConnectEvent()),
           ),
         ],
         child: const DrawingBoardPage(),
