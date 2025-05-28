@@ -1,3 +1,4 @@
+import 'package:draw_new/core/utils/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -76,9 +77,20 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Dimensions appDimension = Dimensions(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Draw it'),
+        title: FittedBox(
+          child: Text(
+            'Draw it',
+            style: TextStyle(
+              fontFamily: Dimensions.font,
+              fontSize: appDimension.h3,
+              fontWeight: Dimensions.fontBold,
+            ),
+          ),
+        ),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         actions: [
@@ -153,6 +165,11 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
                       isActualConnected
                           ? 'Connected as ${state.userName.isNotEmpty ? state.userName : "User"}'
                           : 'Disconnected. Trying to reconnect...',
+                      style: TextStyle(
+                        fontFamily: Dimensions.font,
+                        fontSize: appDimension.h6,
+                        fontWeight: Dimensions.fontRegular,
+                      ),
                     ),
                   ],
                 ),
@@ -217,12 +234,20 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
   void _showNameDialog() {
     final currentName = context.read<SocketBloc>().state.userName;
     final controller = TextEditingController(text: currentName);
+    final Dimensions appDimension = Dimensions(context);
 
     showDialog(
       context: context,
       builder:
           (newContext) => AlertDialog(
-            title: const Text('Change Your Name'),
+            title: Text(
+              'Change Your Name',
+              style: TextStyle(
+                fontFamily: Dimensions.font,
+                fontSize: appDimension.h4,
+                fontWeight: Dimensions.fontBold,
+              ),
+            ),
             content: TextField(
               controller: controller,
               decoration: const InputDecoration(labelText: 'Your Name'),
@@ -231,7 +256,14 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(newContext),
-                child: const Text('CANCEL'),
+                child: Text(
+                  'CANCEL',
+                  style: TextStyle(
+                    fontFamily: Dimensions.font,
+                    fontSize: appDimension.h6,
+                    fontWeight: Dimensions.fontRegular,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
@@ -242,7 +274,14 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
                   }
                   Navigator.pop(newContext);
                 },
-                child: const Text('SAVE'),
+                child: Text(
+                  'SAVE',
+                  style: TextStyle(
+                    fontFamily: Dimensions.font,
+                    fontSize: appDimension.h6,
+                    fontWeight: Dimensions.fontRegular,
+                  ),
+                ),
               ),
             ],
           ),
@@ -261,6 +300,11 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
               success
                   ? 'Drawing saved successfully!'
                   : 'Failed to save drawing',
+              style: TextStyle(
+                fontFamily: Dimensions.font,
+                fontSize: Dimensions(context).h6,
+                fontWeight: Dimensions.fontRegular,
+              ),
             ),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
@@ -270,7 +314,14 @@ class _DrawingBoardPageState extends State<DrawingBoardPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving drawing: $e'),
+            content: Text(
+              'Error saving drawing: $e',
+              style: TextStyle(
+                fontFamily: Dimensions.font,
+                fontSize: Dimensions(context).h6,
+                fontWeight: Dimensions.fontRegular,
+              ),
+            ),
             backgroundColor: Colors.red,
           ),
         );

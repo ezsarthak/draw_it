@@ -24,13 +24,17 @@ abstract class SocketDataSource {
 
 class SocketDataSourceImpl implements SocketDataSource {
   io.Socket? _socket;
-  
-  final StreamController<DrawnLine> _drawLineController = StreamController.broadcast();
+
+  final StreamController<DrawnLine> _drawLineController =
+      StreamController.broadcast();
   final StreamController<void> _undoController = StreamController.broadcast();
   final StreamController<void> _redoController = StreamController.broadcast();
-  final StreamController<void> _clearCanvasController = StreamController.broadcast();
-  final StreamController<List<User>> _usersUpdateController = StreamController.broadcast();
-  final StreamController<bool> _connectionController = StreamController.broadcast();
+  final StreamController<void> _clearCanvasController =
+      StreamController.broadcast();
+  final StreamController<List<User>> _usersUpdateController =
+      StreamController.broadcast();
+  final StreamController<bool> _connectionController =
+      StreamController.broadcast();
 
   @override
   Future<void> connect() async {
@@ -55,12 +59,15 @@ class SocketDataSourceImpl implements SocketDataSource {
 
       _socket!.on('users_update', (data) {
         try {
-          final users = List<Map<String, dynamic>>.from(data)
-              .map((userData) => User(
-                    id: userData['id'] ?? '',
-                    name: userData['name'] ?? '',
-                  ))
-              .toList();
+          final users =
+              List<Map<String, dynamic>>.from(data)
+                  .map(
+                    (userData) => User(
+                      id: userData['id'] ?? '',
+                      name: userData['name'] ?? '',
+                    ),
+                  )
+                  .toList();
           _usersUpdateController.add(users);
         } catch (e) {
           print('Error parsing users_update: $e');

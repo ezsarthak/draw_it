@@ -1,3 +1,4 @@
+import 'package:draw_new/core/utils/dimensions.dart';
 import 'package:flutter/material.dart';
 
 class DrawingControls extends StatelessWidget {
@@ -20,6 +21,8 @@ class DrawingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Dimensions appDimension = Dimensions(context);
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -41,13 +44,20 @@ class DrawingControls extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Eraser toggle
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
               children: [
-                const Text('Eraser:'),
+                Text(
+                  'Eraser:',
+                  style: TextStyle(
+                    fontFamily: Dimensions.font,
+                    fontSize: appDimension.h5,
+                    fontWeight: Dimensions.fontRegular,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Switch(
                   value: isEraser,
@@ -57,20 +67,28 @@ class DrawingControls extends StatelessWidget {
                 const Spacer(),
                 if (isEraser)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Eraser Mode Active',
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(
+                        fontFamily: Dimensions.font,
+                        color: Colors.blue,
+                        fontSize: appDimension.h5,
+                        fontWeight: Dimensions.fontBold,
+                      ),
                     ),
                   ),
               ],
             ),
           ),
-          
+
           // Stroke width slider
           Row(
             children: [
