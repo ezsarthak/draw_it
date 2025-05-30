@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         brightness: Brightness.dark,
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       home: MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => GetIt.instance<DrawingBloc>()),
